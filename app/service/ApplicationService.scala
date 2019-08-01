@@ -50,6 +50,7 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
   def fetchCredentials(id: String)(implicit hc: HeaderCarrier): Future[ApplicationTokens] =
     connectorWrapper.forApplication(id).flatMap(_.thirdPartyApplicationConnector.fetchCredentials(id))
 
+  // TODO - Fix me
   def apisWithSubscriptions(application: Application)(implicit hc: HeaderCarrier): Future[Seq[APISubscriptionStatus]] = {
 
     def toApiSubscriptionStatuses(api: APISubscription, version: VersionSubscription): Future[APISubscriptionStatus] = {
@@ -76,8 +77,11 @@ class ApplicationService @Inject()(connectorWrapper: ConnectorsWrapper,
 
     val thirdPartyAppConnector = connectorWrapper.connectorsForEnvironment(application.deployedTo).thirdPartyApplicationConnector
 
+    // Note: Pull these request out as val so they execute fully async?
     for {
+      // TODO - Get all the api-definitions here grouped by context?
       subscriptions <- thirdPartyAppConnector.fetchSubscriptions(application.id)
+      // definitionsByContext <- doSomeStuff
       apiVersions <- Future.sequence(subscriptions.flatMap(toApiVersions))
     } yield apiVersions
   }

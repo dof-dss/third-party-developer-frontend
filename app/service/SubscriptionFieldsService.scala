@@ -45,7 +45,18 @@ class SubscriptionFieldsService @Inject()(connectorsWrapper: ConnectorsWrapper)(
       }
     }
 
+    // TODO - Don't get single api-version definitions
     connector.fetchFieldDefinitions(apiContext, apiVersion).flatMap(fetchFieldsValues)
+  }
+
+  // TODO - New method to get any api-field-definitions and any values for an application?
+  def fetchFieldsAndDefinitions(application: Application)(implicit hc: HeaderCarrier) : Future[Seq[SubscriptionField]] = {
+
+    // Get all / any definitions
+    // Get application api values for definition
+
+    // TODO : Need to return SubscriptionField grouped / keyed by apiContext & apiVersion
+    Future.successful(Seq.empty)
   }
 
   def saveFieldValues(applicationId: String, apiContext: String, apiVersion: String, fields: Fields)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
