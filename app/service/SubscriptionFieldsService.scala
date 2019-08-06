@@ -35,7 +35,9 @@ class SubscriptionFieldsService @Inject()(connectorsWrapper: ConnectorsWrapper)(
     }
 
     def fetchFieldsValues(fieldDefinitions: Seq[SubscriptionField])(implicit hc: HeaderCarrier): Future[Seq[SubscriptionField]] = {
-      if (fieldDefinitions.isEmpty) Future.successful(Seq.empty)
+      if (fieldDefinitions.isEmpty) {
+        Future.successful(Seq.empty)
+      }
       else {
         for {
           maybeValues <- connector.fetchFieldValues(application.clientId, apiContext, apiVersion)
@@ -50,7 +52,7 @@ class SubscriptionFieldsService @Inject()(connectorsWrapper: ConnectorsWrapper)(
   }
 
   // TODO - New method to get any api-field-definitions and any values for an application?
-  def fetchFieldsAndDefinitions(application: Application)(implicit hc: HeaderCarrier) : Future[Seq[SubscriptionField]] = {
+  def fetchFieldsAndDefinitions(application: Application)(implicit hc: HeaderCarrier): Future[Seq[SubscriptionField]] = {
 
     // Get all / any definitions
     // Get application api values for definition
