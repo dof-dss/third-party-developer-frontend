@@ -18,6 +18,7 @@ package controllers
 
 import config.{ApplicationConfig, ErrorHandler}
 import connectors.ThirdPartyDeveloperConnector
+import domain.LoggedInState.LOGGED_IN
 import domain.{Developer, UpdateProfileRequest}
 import javax.inject.{Inject, Singleton}
 import jp.t2v.lab.play2.stackc.RequestWithAttributes
@@ -66,7 +67,7 @@ class Profile @Inject()(applicationService: ApplicationService,
       profile => connector.updateProfile(loggedIn.email, UpdateProfileRequest(profile.firstName.trim, profile.lastName.trim, profile.organisation)) map {
         _ =>
           Ok(profileUpdated("profile updated", "Manage profile", "manage-profile",
-            Developer(loggedIn.email, profile.firstName, profile.lastName, profile.organisation)))
+            Developer(loggedIn.email, profile.firstName, profile.lastName, profile.organisation, loggedInState = Some(LOGGED_IN)))) // TODO : Odd that the logged in is needed here. Really part of session not developer
       }
     )
   }

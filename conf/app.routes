@@ -78,7 +78,7 @@ GET         /application/:id/redirect-uris                                      
 GET         /application/:id/redirect-uris/add                                          controllers.Redirects.addRedirect(id: String)
 POST        /application/:id/redirect-uris/add                                          controllers.Redirects.addRedirectAction(id: String)
 POST        /application/:id/redirect-uris/delete-confirmation                          controllers.Redirects.deleteRedirect(id: String)
-POST        /application/:id/redirect-uris/delete                                       controllers.Redirects.deleteRedirectAction(id: String)
+POST        /application/:id/reduirect-uris/delete                                       controllers.Redirects.deleteRedirectAction(id: String)
 POST        /application/:id/redirect-uris/change                                       controllers.Redirects.changeRedirect(id: String)
 POST        /application/:id/redirect-uris/change-confirmation                          controllers.Redirects.changeRedirectAction(id: String)
 

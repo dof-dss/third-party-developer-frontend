@@ -16,22 +16,17 @@
 
 package domain
 
-import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.play.json.Union
+import enumeratum.{EnumEntry, PlayEnum}
 
-case class Session(sessionId: String, sessionLoggedInState: LoggedInState, developer: Developer)
+sealed trait LoggedInState extends EnumEntry
 
-object Session {
-//  implicit val format = Union.from[LoggedInState]("sessionLoggedInState")
-//    .and[LOGGED_IN](LoggedInState.LOGGED_IN.toString)
-//    .and[PART_LOGGED_IN_ENABLING_MFA](LoggedInState.PART_LOGGED_IN_ENABLING_MFA.toString)
-//    .format
+object LoggedInState extends PlayEnum[LoggedInState] {
 
- // implicit val format: OFormat[LoggedInState] = Json.format[LoggedInState]
+  val values = findValues
 
-  implicit val formatSession: OFormat[Session] = Json.format[Session]
+  final case object LOGGED_IN extends LoggedInState
+
+  final case object PART_LOGGED_IN_ENABLING_MFA extends LoggedInState
+
 }
 
-
-
-class SessionInvalid extends Throwable

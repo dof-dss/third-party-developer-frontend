@@ -22,6 +22,7 @@ import javax.inject.{Inject, Singleton}
 import jp.t2v.lab.play2.auth.LoginLogout
 import model.MfaMandateDetails
 import play.api.i18n.MessagesApi
+import play.api.mvc.Results.Redirect
 import play.api.mvc.{Action, AnyContent, Request, Result}
 import service.AuditAction._
 import service._
@@ -82,19 +83,25 @@ class UserLoginAccount @Inject()(val auditService: AuditService,
 //    println(s"In UserLoginAccount.routeToLoginOr2SV userAuthenticationResponse.session is: ${userAuthenticationResponse.session}")
 //    println(s"In UserLoginAccount.routeToLoginOr2SV userAuthenticationResponse.mfaEnablementRequired is: ${userAuthenticationResponse.mfaEnablementRequired}")
 
-
     (userAuthenticationResponse.session,userAuthenticationResponse.mfaEnablementRequired) match {
-      case (Some(session),_) => audit(LoginSucceeded, session.developer)
+      case (Some(session), false) => audit(LoginSucceeded, session.developer)
         // Retain the Play session so that 'access_uri', if set, is used at the end of the 2SV reminder flow
         gotoLoginSucceeded(session.sessionId, successful(Ok(add2SV(mfaMandateDetails))
           .withSession(playSession)))
-      case (None, false) => successful(Ok(logInAccessCode(ProtectAccountForm.form))
-        .withSession(playSession + ("emailAddress" -> login.emailaddress) + ("nonce" -> userAuthenticationResponse.nonce.get)))
+      case (None, false) => {
+        successful(Ok(logInAccessCode(ProtectAccountForm.form)) //TODO: Need to redirect Future.successful(Redirect(uri).withNewSession)
+          .withSession(playSession + ("emailAddress" -> login.emailaddress) + ("nonce" -> userAuthenticationResponse.nonce.get)))
+      }
 
       // TODO: Test me
       // TODO: Need login at end of the MFA enablement journey (in some other controller)
-      case (None, true) => successful(Ok(protectAccount())
-        .withSession(playSession + ("emailAddress" -> login.emailaddress) + ("nonce" -> userAuthenticationResponse.nonce.get)))
+      case (Some(session), true) => {
+//        successful(Ok(protectAccount())
+//          .withSession(playSession + ("emailAddress" -> login.emailaddress) + ("nonce" -> userAuthenticationResponse.nonce.get)))
+//        Future.successful(Redirect(routes.ProtectAccount.getProtectAccount().url).withSession(playSession))
+        gotoLoginSucceeded(session.sessionId, successful(Redirect(routes.ProtectAccount.getProtectAccount().url)
+          .withSession(playSession)))
+      }
     }
   }
 

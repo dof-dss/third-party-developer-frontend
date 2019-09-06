@@ -103,6 +103,9 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
   def fetchSession(sessionId: String)(implicit hc: HeaderCarrier): Future[Session] = metrics.record(api) {
     http.GET(s"$serviceBaseUrl/session/$sessionId")
       .map(_.json.as[Session])
+      .map({s: Session => println("In TPDConnector.fetchSession before map session is: " + s); s})
+      .map(session => session.copy(developer = session.developer.copy(loggedInState = Some(session.sessionLoggedInState))))
+      .map({s: Session => println("In TPDConnector.fetchSession after map session is: " + s); s})
       .recover {
         case _: NotFoundException => throw new SessionInvalid
       }
@@ -201,6 +204,7 @@ class ThirdPartyDeveloperConnector @Inject()(http: HttpClient, encryptedJson: En
       Json.toJson(loginRequest),
       http.POST(s"$serviceBaseUrl/authenticate", _, Seq(CONTENT_TYPE -> JSON)))
       .map(_.json.as[UserAuthenticationResponse])
+      .map(response => response.copy(session = response.session.map(session => session.copy(developer = session.developer.copy(loggedInState = Some(response.session.get.sessionLoggedInState))))))
       .recover {
         case Upstream4xxResponse(_, UNAUTHORIZED, _, _) => throw new InvalidCredentials
         case Upstream4xxResponse(_, FORBIDDEN, _, _) => throw new UnverifiedAccount

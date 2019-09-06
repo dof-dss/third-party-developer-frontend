@@ -29,7 +29,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.{ExecutionContext, Future}
 import scala.reflect._
 
-trait AuthConfigImpl  extends AuthConfig {
+trait AuthConfigImpl extends AuthConfig {
 
   val errorHandler: ErrorHandler
   val sessionService: SessionService
@@ -74,10 +74,30 @@ trait AuthConfigImpl  extends AuthConfig {
   def authorize(user: User, authority: Authority)(implicit ctx: ExecutionContext): Future[Boolean] = {
     def getRole(app: Future[Application], user: Developer) = app.map(_.collaborators.find(_.emailAddress == user.email))
 
+    println("In AuthConfigImpl.authorise - authorize.getClass: " + authority.getClass)
+    println("In AuthConfigImpl.authorise - user: " + user)
     authority match {
-      case AppAdmin(app) => getRole(app, user).map(_.exists(_.role == Role.ADMINISTRATOR))
-      case AppTeamMember(app) => getRole(app, user).map(_.isDefined)
-      case _ => Future.successful(true)
+      case AppAdmin(app) => {
+        println("*** AppAdmin")
+        getRole(app, user).map(_.exists(_.role == Role.ADMINISTRATOR))
+      }
+      case AppTeamMember(app) => {
+        println("*** AppTeamMember")
+        getRole(app, user).map(_.isDefined)
+      }
+      case PartLoggedInUser if user.loggedInState.get == LoggedInState.PART_LOGGED_IN_ENABLING_MFA => {
+        //case PartLoggedInUser if true => {
+        println("*** authorize PartLoggedInUser")
+        Future.successful(true)
+      }
+      case LoggedInUser if user.loggedInState.get == LoggedInState.LOGGED_IN => {
+        println("*** authorize LoggedInUser")
+        Future.successful(true)
+      }
+      case _ => {
+        println("*** authorize everything else")
+        Future.successful(false)
+      }
     }
   }
 

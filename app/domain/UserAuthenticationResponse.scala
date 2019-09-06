@@ -21,7 +21,7 @@ import play.api.libs.json.Json
 case class UserAuthenticationResponse(accessCodeRequired: Boolean,
                                       nonce: Option[String] = None,
                                       session: Option[Session] = None,
-                                      mfaEnablementRequired: Boolean)
+                                      mfaEnablementRequired: Boolean) // TODO - Remove as this is now in session
 
 object UserAuthenticationResponse {
   implicit val formatUserAuthenticationResponse = Json.format[UserAuthenticationResponse]
